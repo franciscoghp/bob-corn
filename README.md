@@ -2,9 +2,11 @@
 
 A full-stack application for Bob's Corn store with rate limiting functionality. Built with Vue.js, Node.js, TypeScript, and PostgreSQL.
 
+> 🚀 **Quick Start for Evaluators**: See below for setup in 5 minutes!
+
 ## 📋 Features
 
-- **Rate Limiting**: Enforces a fair policy of 1 corn per client per minute
+- **Rate Limiting**: Enforces a fair policy of 1 corn per client per ~59 seconds
 - **Modern Frontend**: Beautiful, responsive UI built with Vue 3 and Tailwind CSS
 - **Real-time Countdown**: Visual countdown timer showing when users can buy again
 - **Statistics Tracking**: View total purchases and last purchase time
@@ -15,40 +17,67 @@ A full-stack application for Bob's Corn store with rate limiting functionality. 
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- PostgreSQL (v12 or higher)
 - npm or yarn
+- Docker Desktop (installed and running)
+- **Database**: Docker (automatic setup)
 
-### Quick Setup
+**Manual Setup:**
 
-1. **Set up the database**
-   ```sql
-   CREATE DATABASE bobs_corn;
-   ```
+See Database Setup Options below.
 
-2. **Configure environment variables**
-   
-   Create a `.env` file in the `backend/` directory:
-   ```env
-   DATABASE_URL=postgresql://username:password@localhost:5432/bobs_corn
-   PORT=3000
-   NODE_ENV=development
-   ```
-   
-   Replace `username`, `password`, and `localhost:5432` with your PostgreSQL credentials.
 
-3. **Install dependencies**
-   
-   Backend:
+### Database Setup Options
+
+#### Step 1: Choose Your Database Option
+
+##### 🎯 RECOMMENDED for Evaluators: Docker Compose (Local, automatic)
+
+1. **Install Docker Desktop** (if you don't have it): [docker.com](https://www.docker.com/products/docker-desktop)
+
+2. **Make sure Docker Desktop is running**
+
+3. **Start the database:**
    ```bash
-   cd backend
-   npm install
+   docker-compose up -d
    ```
-   
-   Frontend:
+   This creates and starts PostgreSQL automatically.
+
+3. **To stop the database:**
    ```bash
-   cd frontend
-   npm install
+   docker-compose down
    ```
+
+4. **To stop and delete data:**
+   ```bash
+   docker-compose down -v
+   ```
+
+
+#### Step 2: Configure Environment Variables
+
+Create a `.env` file in the `backend/` directory:
+
+**For Docker Compose:**
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/bobs_corn
+PORT=3000
+NODE_ENV=development
+```
+
+
+#### Step 3: Install Dependencies
+
+**Backend:**
+```bash
+cd backend
+npm install
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+```
 
 ### Running the Application
 
@@ -85,6 +114,48 @@ npm run build
 npm run preview  # Preview the production build
 ```
 
+## ✅ Verification
+
+After configuring any of the database options, start the backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+You should see:
+```
+✅ Database connection established
+✅ Database schema initialized successfully
+🌽 Bob's Corn API running on port 3000
+```
+
+If you see these messages, everything is working correctly.
+
+1. **Backend working:** Visit `http://localhost:3000/health` - you should see `{"status":"ok",...}`
+2. **Frontend working:** You should see the Bob's Corn interface
+3. **Rate Limiting:** Try buying corn twice in a row - the second time should show error 429
+
+## 🐛 Troubleshooting
+
+### Error: "DATABASE_URL not set"
+- Make sure you created the `.env` file in the `backend/` folder
+- Verify the connection path is correct
+- Copy `backend/env.example` to `backend/.env` and fill in the values
+
+### Error: "Connection refused" or "ECONNREFUSED"
+- Verify Docker is running: `docker ps`
+- Start the container: `docker-compose up -d`
+- Check logs: `docker-compose logs postgres`
+
+### Error: "Cannot find module"
+- Run `npm install` in both folders (backend and frontend)
+- Make sure you're in the correct directory
+
+### Frontend not connecting to backend
+- Verify backend is running on port 3000
+- Verify proxy in `vite.config.ts` points to `http://localhost:3000`
+
 ## 🏗️ Architecture
 
 ### Backend Structure
@@ -120,7 +191,7 @@ frontend/
 ## 🔧 API Endpoints
 
 ### POST `/api/buy-corn`
-Buy a corn. Rate limited to 1 per minute per client.
+Buy a corn. Rate limited to 1 per ~59 seconds per client.
 
 **Headers:**
 - `x-client-id`: Unique client identifier (required)
@@ -170,7 +241,7 @@ Health check endpoint.
 
 ## 🎯 Rate Limiting Strategy
 
-The rate limiter enforces the business rule: **1 corn per client per minute**.
+The rate limiter enforces the business rule: **1 corn per client per ~59 seconds**.
 
 **Implementation:**
 - Uses `x-client-id` header for client identification (falls back to IP address)
@@ -197,7 +268,7 @@ To test the rate limiting:
 1. Open the frontend in your browser
 2. Click "Buy Corn" button
 3. Try clicking again immediately - you should see a 429 error
-4. Wait for the countdown timer to reach 0
+4. Wait for the countdown timer to reach 0 (~59 seconds)
 5. You can now buy again
 
 ## 🛠️ Technologies Used
@@ -222,6 +293,9 @@ To test the rate limiting:
 - The rate limiter uses a "fail closed" strategy (denies requests if database check fails)
 - Database connection pooling is configured for optimal performance
 - The frontend automatically syncs with the backend rate limit status
+- The database initializes automatically when starting the backend
+- Rate limiting is 1 corn per ~59 seconds per client
+- The countdown timer updates automatically in the frontend
 
 ## 🎨 Design Decisions
 

@@ -34,12 +34,10 @@
         <div class="bg-white rounded-xl shadow-xl p-6 mb-6">
           <button
             @click="buyCorn"
-            :disabled="isLoading || isRateLimited"
+            :disabled="isLoading"
             :class="[
               'w-full py-5 px-6 rounded-lg font-semibold text-lg transition-all duration-200 relative overflow-hidden',
-              isRateLimited
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : isLoading
+              isLoading
                 ? 'bg-amber-400 text-white cursor-wait'
                 : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
             ]"
@@ -168,8 +166,8 @@ const loadStats = async () => {
     if (stats.lastPurchase) {
       const lastPurchaseTime = new Date(stats.lastPurchase).getTime();
       const timeSinceLastPurchase = Date.now() - lastPurchaseTime;
-      const secondsRemaining = Math.ceil((60000 - timeSinceLastPurchase) / 1000);
-      
+      const secondsRemaining = Math.min(60, Math.max(0, Math.ceil((60000 - timeSinceLastPurchase) / 1000)));
+
       if (secondsRemaining > 0) {
         startCountdown(secondsRemaining);
       }
@@ -181,7 +179,7 @@ const loadStats = async () => {
 };
 
 const buyCorn = async () => {
-  if (isLoading.value || isRateLimited.value) return;
+  if (isLoading.value) return;
 
   isLoading.value = true;
   message.value = '';
@@ -200,10 +198,8 @@ const buyCorn = async () => {
   } catch (error: any) {
     if (error.response?.status === 429) {
       const retryAfter = error.response.data?.retryAfter || 60;
-      showMessage(
-        error.response.data?.message || 'Too many requests. Please wait before trying again.',
-        'error'
-      );
+      const serverMsg = error.response.data?.message || 'Too many requests. Please wait before trying again.';
+      showMessage(`${serverMsg} Try again in ${retryAfter}s.`, 'error');
       startCountdown(retryAfter);
     } else if (error.response?.status === 503) {
       showMessage('Service temporarily unavailable. Please try again in a moment.', 'error');

@@ -13,7 +13,7 @@ import { CustomRequest } from '../middleware/rateLimiter';
 export async function buyCorn(req: CustomRequest, res: Response) {
   try {
     const clientId = req.clientId;
-
+    console.log('Processing corn purchase for client:', clientId);
     if (!clientId) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -28,13 +28,13 @@ export async function buyCorn(req: CustomRequest, res: Response) {
        RETURNING id, purchased_at`,
       [clientId]
     );
-
+    console.log('Purchase record inserted:', result.rows[0]);
     if (!result.rows || result.rows.length === 0) {
       throw new Error('Failed to insert purchase record');
     }
 
     const purchase = result.rows[0];
-
+    console.log('Purchase successful:', purchase);
     res.status(200).json({
       success: true,
       message: '🌽 Corn purchased successfully!',

@@ -51,7 +51,7 @@ export const buyCornAPI = async (clientId: string): Promise<BuyCornResponse> => 
   if (!clientId || clientId.trim() === '') {
     throw new Error('Client ID is required');
   }
-
+  console.log('Sending buy corn request with client ID:', clientId);
   const response = await api.post<BuyCornResponse>(
     '/buy-corn',
     {},
@@ -61,6 +61,7 @@ export const buyCornAPI = async (clientId: string): Promise<BuyCornResponse> => 
       },
     }
   );
+  console.log('Buy corn response:', response.data);
   return response.data;
 };
 

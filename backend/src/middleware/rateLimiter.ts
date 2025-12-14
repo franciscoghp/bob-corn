@@ -41,7 +41,8 @@ export async function rateLimiter(
     
     const result = await pool.query(
       `SELECT COUNT(*)::int as count,
-              MAX(purchased_at) as last_purchase
+              MAX(purchased_at) as last_purchase,
+              EXTRACT(EPOCH FROM (NOW() - MAX(purchased_at)))::int as seconds_since_last
        FROM corn_purchases 
        WHERE client_id = $1 
        AND purchased_at > $2`,
@@ -50,21 +51,23 @@ export async function rateLimiter(
 
     const purchaseCount = result.rows[0]?.count || 0;
     const lastPurchase = result.rows[0]?.last_purchase;
+    const secondsSinceLast = result.rows[0]?.seconds_since_last ?? null;
+    console.log(`Client ${clientId} has made ${purchaseCount} purchases in the last minute.`);
+    console.log('Last purchase time:', lastPurchase);
+    if (lastPurchase && secondsSinceLast !== null) {
+      console.log('Seconds since last purchase (DB clock):', secondsSinceLast);
 
-    if (purchaseCount >= 1) {
-      // Calculate seconds until they can buy again
-      let retryAfter = 60;
-      if (lastPurchase) {
-        const lastPurchaseTime = new Date(lastPurchase).getTime();
-        const timeSinceLastPurchase = Date.now() - lastPurchaseTime;
-        retryAfter = Math.ceil((60000 - timeSinceLastPurchase) / 1000);
+      // If the last purchase was made less than 60 seconds ago, reject
+      if (secondsSinceLast < 60) {
+        const retryAfter = Math.max(1, 60 - Math.floor(secondsSinceLast));
+        console.log('Retry after (s):', retryAfter);
+
+        return res.status(429).json({
+          error: 'Too Many Requests',
+          message: 'You can only buy 1 corn per minute. Please wait before trying again.',
+          retryAfter
+        });
       }
-
-      return res.status(429).json({
-        error: 'Too Many Requests',
-        message: 'You can only buy 1 corn per minute. Please wait before trying again.',
-        retryAfter: Math.max(1, retryAfter)
-      });
     }
 
     // Rate limit check passed
