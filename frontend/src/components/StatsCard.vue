@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 
-const props = defineProps<{
+defineProps<{
   totalPurchases: number;
   lastPurchase: string | null;
 }>();
