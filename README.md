@@ -136,14 +136,14 @@ If you see these messages, everything is working correctly.
 2. **Frontend working:** You should see the Bob's Corn interface
 3. **Rate Limiting:** Try buying corn twice in a row - the second time should show error 429
 
-## ☁️ Deployment
-
-- **Database:** Neon (free Postgres). Copy the connection string (`?sslmode=require`).
-- **Backend:** Render Web Service using [`render.yaml`](render.yaml) (root dir `backend`). Set `DATABASE_URL` and `FRONTEND_URL` in the dashboard.
-- **Frontend:** Vercel, root directory `frontend`, framework preset *Vite*. Set `VITE_API_URL` to `https://<your-render-service>.onrender.com/api`.
-
-> The free Render tier sleeps after inactivity, so the first request may take ~30–60 s.
-
+## ☁️ Deployment
+
+Everything runs on free tiers:
+
+- **Database:** Neon (serverless Postgres). Copy the connection string with `?sslmode=require`.
+- **Backend:** Vercel project with *Root Directory* `backend`. The Express app is exported as a serverless function in [`backend/api/index.ts`](backend/api/index.ts); tables are created automatically on the first request. Env vars: `DATABASE_URL`, `FRONTEND_URL` (the frontend URL), `NODE_ENV=production`.
+- **Frontend:** Vercel project with *Root Directory* `frontend` (preset *Vite*). Env var: `VITE_API_URL=https://<your-backend>.vercel.app/api`.
+
 ## 🐛 Troubleshooting
 
 ### Error: "DATABASE_URL not set"

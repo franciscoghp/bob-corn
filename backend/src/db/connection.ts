@@ -11,15 +11,15 @@ if (!process.env.DATABASE_URL) {
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   // Connection pool settings
-  max: 20,
+  max: Number(process.env.DB_POOL_MAX) || 5, // keep small: each serverless instance has its own pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000, // serverless Postgres (Neon) may need a few seconds to wake up
 });
 
 // Test connection on startup
 pool.on('error', (err) => {
+  // Idle clients can be dropped by serverless Postgres; log and let the pool reconnect
   console.error('❌ Unexpected error on idle client', err);
-  process.exit(-1);
 });
 
 /**
