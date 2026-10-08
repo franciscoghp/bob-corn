@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: bobs-corn-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false   # paste your Neon connection string in the Render dashboard
+      - key: FRONTEND_URL
+        sync: false   # your Vercel URL, e.g. https://bobs-corn.vercel.app

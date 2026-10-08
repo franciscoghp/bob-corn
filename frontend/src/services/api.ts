@@ -1,7 +1,8 @@
 import axios, { AxiosError } from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  // In production the API lives on another host (set VITE_API_URL); in dev the Vite proxy handles /api
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },

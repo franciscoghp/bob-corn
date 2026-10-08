@@ -13,7 +13,7 @@ export const pool = new Pool({
   // Connection pool settings
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // serverless Postgres (Neon) may need a few seconds to wake up
 });
 
 // Test connection on startup

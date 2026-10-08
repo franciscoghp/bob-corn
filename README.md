@@ -136,6 +136,14 @@ If you see these messages, everything is working correctly.
 2. **Frontend working:** You should see the Bob's Corn interface
 3. **Rate Limiting:** Try buying corn twice in a row - the second time should show error 429
 
+## ☁️ Deployment
+
+- **Database:** Neon (free Postgres). Copy the connection string (`?sslmode=require`).
+- **Backend:** Render Web Service using [`render.yaml`](render.yaml) (root dir `backend`). Set `DATABASE_URL` and `FRONTEND_URL` in the dashboard.
+- **Frontend:** Vercel, root directory `frontend`, framework preset *Vite*. Set `VITE_API_URL` to `https://<your-render-service>.onrender.com/api`.
+
+> The free Render tier sleeps after inactivity, so the first request may take ~30–60 s.
+
 ## 🐛 Troubleshooting
 
 ### Error: "DATABASE_URL not set"
